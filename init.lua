@@ -169,6 +169,17 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+--  Toggle signs column on and off
+vim.keymap.set('n', '<leader>ts', function()
+  if vim.o.signcolumn == 'yes' then
+    vim.o.signcolumn = 'no'
+    vim.notify('Signcolumn turned OFF', vim.log.levels.INFO)
+  else
+    vim.o.signcolumn = 'yes'
+    vim.notify('Signcolumn turned ON', vim.log.levels.INFO)
+  end
+end, { desc = '[T]oggle [S]igncolumn' })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
