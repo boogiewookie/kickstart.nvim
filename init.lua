@@ -105,6 +105,9 @@ vim.o.number = false
 --  Experiment for yourself to see if you like it!
 -- vim.o.relativenumber = true
 
+-- enable modelines
+vim.o.modeline = true
+
 -- Enable mmouse mode, can be useful for ZZouse mode, can be useful for resizing splits for example!
 vim.o.mouse = ''
 
