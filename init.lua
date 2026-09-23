@@ -691,6 +691,11 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         pyright = {},
+        beancount = {
+          init_options = {
+            journal_file = vim.fn.expand '~/beancount/ledger/journal.bean',
+          },
+        },
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -730,25 +735,19 @@ require('lazy').setup({
       --
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
-      })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      -- Native LSP config (Neovim 0.11+): apply capabilities + custom settings
+      -- BEFORE enabling, so the servers start with our init_options.
+      for server_name, server_opts in pairs(servers) do
+        server_opts.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server_opts.capabilities or {})
+        vim.lsp.config(server_name, server_opts)
+      end
+      vim.lsp.enable(vim.tbl_keys(servers))
+
+      require('mason-tool-installer').setup { ensure_installed = { 'pyright', 'lua-language-server', 'beancount-language-server', 'stylua' } }
 
       require('mason-lspconfig').setup {
-        ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-        automatic_installation = false,
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        ensure_installed = {}, -- explicitly set to an empty table (populates installs via mason-tool-installer above)
+        automatic_enable = false, -- we enable explicitly via vim.lsp.enable() so custom init_options apply
       }
     end,
   },
